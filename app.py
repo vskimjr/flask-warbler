@@ -1,4 +1,5 @@
 import os
+from pdb import Pdb
 from dotenv import load_dotenv
 
 from flask import Flask, render_template, request, flash, redirect, session, g
@@ -67,6 +68,8 @@ def signup():
 
     form = UserAddForm()
 
+    # breakpoint()
+
     if form.validate_on_submit():
         try:
             user = User.signup(
@@ -75,6 +78,7 @@ def signup():
                 email=form.email.data,
                 image_url=form.image_url.data or User.image_url.default.arg,
             )
+            breakpoint()
             db.session.commit()
 
         except IntegrityError:
@@ -193,9 +197,16 @@ def start_following(follow_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
+    # breakpoint()
+
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.append(followed_user)
+
+    print("followed_user=", followed_user)
+    # breakpoint()
+
     db.session.commit()
+
 
     return redirect(f"/users/{g.user.id}/following")
 
