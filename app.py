@@ -219,10 +219,10 @@ def start_following(follow_id):
 
     db.session.commit()
 
-    return redirect(url_for("show_following"))
+    return redirect(f"/users/{g.user.id}/following")
     # TODO: Verify if this url_for is working
 
-        # f"/users/{g.user.id}/following")
+    # f"/users/{g.user.id}/following")
 
 
 @app.post('/users/stop-following/<int:follow_id>')
@@ -246,9 +246,8 @@ def stop_following(follow_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}/following")
-        # TODO: Very if this url_for is working
-        # f"/users/{g.user.id}/following")
-
+    # TODO: Very if this url_for is working
+    # f"/users/{g.user.id}/following")
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
