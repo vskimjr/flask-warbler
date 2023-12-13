@@ -135,7 +135,10 @@ def logout():
         do_logout()
 
         flash("Successfully logged out", "success")
-        return redirect(url_for("homepage"))
+        return redirect(url_for("login"))
+
+    flash("Access unauthorized.", "danger")
+    return redirect(url_for("homepage"))
 
 ##############################################################################
 # General user routes:
@@ -150,7 +153,7 @@ def list_users():
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect("/")
+        return redirect(url_for("homepage"))
 
     search = request.args.get('q')
 
@@ -168,7 +171,7 @@ def show_user(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect("/")
+        return redirect(url_for("homepage"))
 
     user = User.query.get_or_404(user_id)
 
@@ -181,7 +184,7 @@ def show_following(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect("/")
+        return redirect(url_for("homepage"))
 
     user = User.query.get_or_404(user_id)
     return render_template('users/following.html', user=user)
@@ -193,7 +196,7 @@ def show_followers(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect("/")
+        return redirect(url_for("homepage"))
 
     user = User.query.get_or_404(user_id)
     return render_template('users/followers.html', user=user)
@@ -210,17 +213,18 @@ def start_following(follow_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    # breakpoint()
+    form = g.csrf_protection
 
-    followed_user = User.query.get_or_404(follow_id)
-    g.user.following.append(followed_user)
+    if form.validate_on_submit():
+        followed_user = User.query.get_or_404(follow_id)
+        g.user.following.append(followed_user)
 
-    print("followed_user=", followed_user)
-    # breakpoint()
+        db.session.commit()
 
-    db.session.commit()
+    return redirect(url_for("show_following"))
+    # TODO: Verify if this url_for is working
 
-    return redirect(f"/users/{g.user.id}/following")
+        # f"/users/{g.user.id}/following")
 
 
 @app.post('/users/stop-following/<int:follow_id>')
