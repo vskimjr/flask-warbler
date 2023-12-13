@@ -233,16 +233,19 @@ def stop_following(follow_id):
     """
 
     form = g.csrf_protection
-
-    if not g.user or not form.validate_on_submit():
+    # breakpoint()
+    if not form.validate_on_submit() or not g.user:
+        print("g.user=", g.user)
+        # breakpoint()
         flash("Access unauthorized.", "danger")
         return redirect(url_for("homepage"))
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.remove(followed_user)
+    # breakpoint()
     db.session.commit()
 
-    return redirect(url_for("show_following"))
+    return redirect(f"/users/{g.user.id}/following")
         # TODO: Very if this url_for is working
         # f"/users/{g.user.id}/following")
 
