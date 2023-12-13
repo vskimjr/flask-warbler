@@ -1,12 +1,12 @@
 import os
-from pdb import Pdb
+import pdb
 from dotenv import load_dotenv
 
-from flask import Flask, render_template, request, flash, redirect, session, g
+from flask import Flask, render_template, request, flash, redirect, session, g, url_for
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, CSRFProtectForm
 from models import db, connect_db, User, Message
 
 load_dotenv()
@@ -37,6 +37,12 @@ def add_user_to_g():
 
     else:
         g.user = None
+
+@app.before_request
+def add_csrf_protect_to_g():
+    """Add CSRF protection to global environment"""
+
+    g.csrf_protection = CSRFProtectForm()
 
 
 def do_login(user):
@@ -119,11 +125,16 @@ def login():
 def logout():
     """Handle logout of user and redirect to homepage."""
 
-    form = g.csrf_form
+    form = g.csrf_protection
 
     # IMPLEMENT THIS AND FIX BUG
     # DO NOT CHANGE METHOD ON ROUTE
 
+    if form.validate_on_submit():
+        do_logout()
+
+        flash("Successfully logged out")
+        return redirect(url_for("homepage"))
 
 ##############################################################################
 # General user routes:
