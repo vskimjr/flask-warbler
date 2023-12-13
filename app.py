@@ -259,18 +259,27 @@ def delete_user():
 
     Redirect to signup page.
     """
-# FIXME: no csrf checks for delete
 
-    if not g.user:
+    form = g.csrf_protection
+
+    if not form.validate_on_submit or not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect("/")
+        return redirect(url_for("homepage"))
 
     do_logout()
+
+
+
+    # Message.query.filter_by("user_id"=)
+
+    #TODO: Ask why db.session.delete(user.messages) does not work
+    # UnmappedInstanceError: Class 'sqlalchemy.orm.collections.InstrumentedList' is not mapped
+
 
     db.session.delete(g.user)
     db.session.commit()
 
-    return redirect("/signup")
+    return redirect(url_for("signup"))
 
 
 
@@ -283,8 +292,6 @@ def add_message():
 
     Show form if GET. If valid, update message and redirect to user page.
     """
-
-    # TODO: Check if csrf_protection is needed here
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -306,8 +313,6 @@ def add_message():
 def show_message(message_id):
     """Show a message."""
 
-    # TODO: csrf_protection needed for unfollow button
-
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -324,12 +329,11 @@ def delete_message(message_id):
     Redirect to user page on success.
     """
 
-    # TODO: Check if csrf_protection is needed here
+    form = g.csrf_protection
 
-
-    if not g.user:
+    if not form.validate_on_submit() or not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect("/")
+        return redirect(url_for("homepage"))
 
     msg = Message.query.get_or_404(message_id)
     db.session.delete(msg)
