@@ -38,6 +38,7 @@ def add_user_to_g():
     else:
         g.user = None
 
+
 @app.before_request
 def add_csrf_protect_to_g():
     """Add CSRF protection to global environment"""
@@ -133,11 +134,12 @@ def logout():
     if form.validate_on_submit():
         do_logout()
 
-        flash("Successfully logged out")
+        flash("Successfully logged out", "success")
         return redirect(url_for("homepage"))
 
 ##############################################################################
 # General user routes:
+
 
 @app.get('/users')
 def list_users():
@@ -217,7 +219,6 @@ def start_following(follow_id):
     # breakpoint()
 
     db.session.commit()
-
 
     return redirect(f"/users/{g.user.id}/following")
 
