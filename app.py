@@ -208,18 +208,16 @@ def start_following(follow_id):
 
     Redirect to following page for the current for the current user.
     """
-
-    if not g.user:
-        flash("Access unauthorized.", "danger")
-        return redirect("/")
-
     form = g.csrf_protection
 
-    if form.validate_on_submit():
-        followed_user = User.query.get_or_404(follow_id)
-        g.user.following.append(followed_user)
+    if not g.user or not form.validate_on_submit():
+        flash("Access unauthorized.", "danger")
+        return redirect(url_for("homepage"))
 
-        db.session.commit()
+    followed_user = User.query.get_or_404(follow_id)
+    g.user.following.append(followed_user)
+
+    db.session.commit()
 
     return redirect(url_for("show_following"))
     # TODO: Verify if this url_for is working
@@ -234,15 +232,20 @@ def stop_following(follow_id):
     Redirect to following page for the current for the current user.
     """
 
-    if not g.user:
+    form = g.csrf_protection
+
+    if not g.user or not form.validate_on_submit():
         flash("Access unauthorized.", "danger")
-        return redirect("/")
+        return redirect(url_for("homepage"))
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.remove(followed_user)
     db.session.commit()
 
-    return redirect(f"/users/{g.user.id}/following")
+    return redirect(url_for("show_following"))
+        # TODO: Very if this url_for is working
+        # f"/users/{g.user.id}/following")
+
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
