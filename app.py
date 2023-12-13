@@ -75,7 +75,6 @@ def signup():
 
     form = UserAddForm()
 
-    # breakpoint()
 
     if form.validate_on_submit():
         try:
@@ -85,7 +84,6 @@ def signup():
                 email=form.email.data,
                 image_url=form.image_url.data or User.image_url.default.arg,
             )
-            breakpoint()
             db.session.commit()
 
         except IntegrityError:
@@ -246,15 +244,13 @@ def stop_following(follow_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}/following")
-    # TODO: Very if this url_for is working
-    # f"/users/{g.user.id}/following")
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
     """Update profile for current user."""
 
-    # IMPLEMENT THIS
+    # TODO: IMPLEMENT THIS
 
 
 @app.post('/users/delete')
@@ -263,6 +259,7 @@ def delete_user():
 
     Redirect to signup page.
     """
+# FIXME: no csrf checks for delete
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -276,6 +273,7 @@ def delete_user():
     return redirect("/signup")
 
 
+
 ##############################################################################
 # Messages routes:
 
@@ -285,6 +283,8 @@ def add_message():
 
     Show form if GET. If valid, update message and redirect to user page.
     """
+
+    # TODO: Check if csrf_protection is needed here
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -306,6 +306,8 @@ def add_message():
 def show_message(message_id):
     """Show a message."""
 
+    # TODO: csrf_protection needed for unfollow button
+
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -321,6 +323,9 @@ def delete_message(message_id):
     Check that this message was written by the current user.
     Redirect to user page on success.
     """
+
+    # TODO: Check if csrf_protection is needed here
+
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -344,6 +349,8 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of self & followed_users
     """
+
+    # TODO: currently showing all users and not just self and followed
 
     if g.user:
         messages = (Message
