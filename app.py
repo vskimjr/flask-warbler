@@ -269,12 +269,11 @@ def delete_user():
     do_logout()
 
 
+    # DELETE FROM messages WHERE user_id = curr_user
+    Message.query.filter_by(user_id=g.user.id).delete()
 
-    # Message.query.filter_by("user_id"=)
-
-    #TODO: Ask why db.session.delete(user.messages) does not work
+    # TODO: Ask why db.session.delete(user.messages) does not work
     # UnmappedInstanceError: Class 'sqlalchemy.orm.collections.InstrumentedList' is not mapped
-
 
     db.session.delete(g.user)
     db.session.commit()
