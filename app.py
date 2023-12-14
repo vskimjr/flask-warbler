@@ -375,16 +375,21 @@ def homepage():
     - logged in: 100 most recent messages of self & followed_users
     """
 
-    # TODO: currently showing all users and not just self and followed
+    # FIXME: Message.user_id == g.user.id, > this filter works for MY messages
+        # figuring out how to combine this with messages from accounts I follow
 
     if g.user:
         messages = (Message
                     .query
+                    .filter(Message.user_id.in_(user.id for user in g.user.following))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
 
+
         return render_template('home.html', messages=messages)
+
+    # FROM, WHERE, GROUP BY
 
     else:
         return render_template('home-anon.html')
