@@ -2,10 +2,9 @@ import os
 import pdb
 from dotenv import load_dotenv
 
-from flask import Flask, render_template, request, flash, redirect, session, g, url_for
+from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import or_
 
 from forms import UserAddForm, LoginForm, MessageForm, UpdateProfileForm, CSRFProtectForm
 from models import db, connect_db, User, Message, DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL
@@ -92,7 +91,7 @@ def signup():
 
         do_login(user)
 
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     else:
         return render_template('users/signup.html', form=form)
@@ -113,7 +112,7 @@ def login():
         if user:
             do_login(user)
             flash(f"Hello, {user.username}!", "success")
-            return redirect(url_for("homepage"))
+            return redirect("/")
 
         flash("Invalid credentials.", 'danger')
 
@@ -125,15 +124,16 @@ def logout():
     """Handle logout of user and redirect to homepage."""
 
     form = g.csrf_protection
-    # TODO: check to see if g.user exists
-    if form.validate_on_submit():
-        do_logout()
 
-        flash("Successfully logged out", "success")
-        return redirect(url_for("login"))
+    if not g.user or not form.validate_on_submit:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
 
-    flash("Access unauthorized.", "danger")
-    return redirect(url_for("homepage"))
+    do_logout()
+
+    flash("Successfully logged out", "success")
+    return redirect("/login")
+
 
 ##############################################################################
 # General user routes:
@@ -148,7 +148,7 @@ def list_users():
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     search = request.args.get('q')
 
@@ -166,7 +166,7 @@ def show_user(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     user = User.query.get_or_404(user_id)
 
@@ -179,7 +179,7 @@ def show_following(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     user = User.query.get_or_404(user_id)
     return render_template('users/following.html', user=user)
@@ -191,7 +191,7 @@ def show_followers(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     user = User.query.get_or_404(user_id)
     return render_template('users/followers.html', user=user)
@@ -207,7 +207,7 @@ def start_following(follow_id):
 
     if not g.user or not form.validate_on_submit():
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.append(followed_user)
@@ -230,7 +230,7 @@ def stop_following(follow_id):
         print("g.user=", g.user)
         # breakpoint()
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.remove(followed_user)
@@ -247,7 +247,7 @@ def update_profile():
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
         # TODO: be consistent with the existing codebase
 
     user = g.user
@@ -284,7 +284,7 @@ def delete_user():
 
     if not form.validate_on_submit or not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     do_logout()
 
@@ -296,7 +296,7 @@ def delete_user():
     db.session.delete(g.user)
     db.session.commit()
 
-    return redirect(url_for("homepage"))
+    return redirect("/")
 
 
 ##############################################################################
@@ -311,7 +311,7 @@ def add_message():
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     form = MessageForm()
 
@@ -331,7 +331,7 @@ def show_message(message_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     msg = Message.query.get_or_404(message_id)
     return render_template('messages/show.html', message=msg)
@@ -348,13 +348,13 @@ def delete_message(message_id):
     form = g.csrf_protection
     if not form.validate_on_submit() or not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     msg = Message.query.get_or_404(message_id)
 
     if msg.user_id != g.user.id:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect("/")
 
     db.session.delete(msg)
     db.session.commit()
@@ -373,7 +373,7 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of self & followed_users
     """
-    # TODO: make this cleaner. Alt way of doing this is to grab ids from following ...
+
     if g.user:
 
         following_ids = [
