@@ -185,6 +185,32 @@ class Message(db.Model):
     )
 
 
+class Like(db.Model):
+    """Liked messages by users"""
+
+    __tablename__ = "likes"
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True,
+        autoincrement=True
+    )
+
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('messages.id', ondelete='CASCADE'),
+        nullable=False,
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete='CASCADE'),
+        nullable=False,
+    )
+
+
+
+
 def connect_db(app):
     """Connect this database to provided Flask app.
 
