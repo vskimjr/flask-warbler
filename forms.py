@@ -14,17 +14,17 @@ class UserAddForm(FlaskForm):
 
     username = StringField(
         'Username',
-        validators=[InputRequired(), Length(max=30)],
+        validators=[InputRequired(), Length(max=30)]
     )
 
     email = StringField(
         'E-mail',
-        validators=[InputRequired(), Email(), Length(max=50)],
+        validators=[InputRequired(), Email(), Length(max=50)]
     )
 
     password = PasswordField(
         'Password',
-        validators=[InputRequired(), Length(min=6, max=50)],
+        validators=[InputRequired(), Length(min=6, max=50)]
     )
 
     image_url = StringField(
@@ -38,25 +38,26 @@ class LoginForm(FlaskForm):
 
     username = StringField(
         'Username',
-        validators=[InputRequired(), Length(max=30)],
+        validators=[InputRequired(), Length(max=30)]
     )
 
     password = PasswordField(
         'Password',
-        validators=[InputRequired(), Length(min=6, max=50)],
+        validators=[InputRequired(), Length(min=6, max=50)]
     )
+
 
 class UpdateProfileForm(FlaskForm):
     """Update profile form."""
 
     username = StringField(
         'Username',
-        validators=[InputRequired(), Length(max=30)],
+        validators=[InputRequired(), Length(max=30)]
     )
 
     email = StringField(
         'E-mail',
-        validators=[InputRequired(), Email(), Length(max=50)],
+        validators=[InputRequired(), Email(), Length(max=50)]
     )
 
     image_url = StringField(
@@ -68,7 +69,7 @@ class UpdateProfileForm(FlaskForm):
         '(Optional) Header Image URL',
         validators=[Optional(), URL(), Length(max=255)]
     )
-
+    
     bio = TextAreaField(
         '(Optional) Bio',
         validators=[Optional(), Length(max=255)]
@@ -81,8 +82,9 @@ class UpdateProfileForm(FlaskForm):
 
     password = PasswordField(
         'Password',
-        validators=[InputRequired(), Length(min=6, max=50)],
+        validators=[InputRequired(), Length(min=6, max=50)]
     )
+
 
 class CSRFProtectForm(FlaskForm):
     """CSRF Protection for when we want to submit & validate a form's origin"""
