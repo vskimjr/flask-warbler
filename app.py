@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, flash, redirect, session, g, url_for
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import or_
 
 from forms import UserAddForm, LoginForm, MessageForm, UpdateProfileForm, CSRFProtectForm
 from models import db, connect_db, User, Message, DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL
@@ -125,9 +126,6 @@ def logout():
 
     form = g.csrf_protection
 
-    # IMPLEMENT THIS AND FIX BUG
-    # DO NOT CHANGE METHOD ON ROUTE
-
     if form.validate_on_submit():
         do_logout()
 
@@ -150,7 +148,7 @@ def list_users():
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("login"))
+        return redirect(url_for("homepage"))
 
     search = request.args.get('q')
 
@@ -168,7 +166,7 @@ def show_user(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("login"))
+        return redirect(url_for("homepage"))
 
     user = User.query.get_or_404(user_id)
 
@@ -209,7 +207,7 @@ def start_following(follow_id):
 
     if not g.user or not form.validate_on_submit():
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("login"))
+        return redirect(url_for("homepage"))
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.append(followed_user)
@@ -217,7 +215,6 @@ def start_following(follow_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}/following")
-
 
 
 @app.post('/users/stop-following/<int:follow_id>')
@@ -233,7 +230,7 @@ def stop_following(follow_id):
         print("g.user=", g.user)
         # breakpoint()
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("login"))
+        return redirect(url_for("homepage"))
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.remove(followed_user)
@@ -247,10 +244,9 @@ def stop_following(follow_id):
 def update_profile():
     """Update profile for current user."""
 
-    # Redirect user back to login page if not signed in
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("login"))
+        return redirect(url_for("homepage"))
 
     user = g.user
 
@@ -274,8 +270,6 @@ def update_profile():
 
     return render_template("/users/edit.html", form=form, user_id=user.id)
 
-    # TODO: IMPLEMENT THIS
-
 
 @app.post('/users/delete')
 def delete_user():
@@ -292,7 +286,6 @@ def delete_user():
 
     do_logout()
 
-    # DELETE FROM messages WHERE user_id = curr_user
     Message.query.filter_by(user_id=g.user.id).delete()
 
     # TODO: Ask why db.session.delete(user.messages) does not work
@@ -301,7 +294,7 @@ def delete_user():
     db.session.delete(g.user)
     db.session.commit()
 
-    return redirect(url_for("signup"))
+    return redirect(url_for("homepage"))
 
 
 ##############################################################################
@@ -316,7 +309,7 @@ def add_message():
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect("/")
+        return redirect(url_for("homepage"))
 
     form = MessageForm()
 
@@ -336,7 +329,7 @@ def show_message(message_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect("/")
+        return redirect(url_for("homepage"))
 
     msg = Message.query.get_or_404(message_id)
     return render_template('messages/show.html', message=msg)
@@ -375,21 +368,19 @@ def homepage():
     - logged in: 100 most recent messages of self & followed_users
     """
 
-    # FIXME: Message.user_id == g.user.id, > this filter works for MY messages
-        # figuring out how to combine this with messages from accounts I follow
-
     if g.user:
         messages = (Message
                     .query
-                    .filter(Message.user_id.in_(user.id for user in g.user.following))
+                    .filter(
+                        or_(
+                            Message.user_id.in_(
+                                user.id for user in g.user.following),
+                            Message.user_id == g.user.id))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
 
-
         return render_template('home.html', messages=messages)
-
-    # FROM, WHERE, GROUP BY
 
     else:
         return render_template('home-anon.html')
