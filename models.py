@@ -90,6 +90,8 @@ class User(db.Model):
 
     messages = db.relationship('Message', backref="user")
 
+    liked_messages = db.relationship('Message', secondary='likes')
+
     followers = db.relationship(
         "User",
         secondary="follows",
@@ -207,7 +209,6 @@ class Like(db.Model):
         db.ForeignKey('users.id', ondelete='CASCADE'),
         nullable=False,
     )
-
 
 
 
