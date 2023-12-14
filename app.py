@@ -7,7 +7,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UpdateProfileForm, CSRFProtectForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL
 
 load_dotenv()
 
@@ -74,7 +74,6 @@ def signup():
     do_logout()
 
     form = UserAddForm()
-
 
     if form.validate_on_submit():
         try:
@@ -252,18 +251,20 @@ def update_profile():
 
     # we are going to pass in the user to the form
 
+    # FIXME: Not validating user signed in
+
     user = g.user
 
     form = UpdateProfileForm(obj=user)
 
     if form.validate_on_submit():
-
         if User.authenticate(user.username, form.password.data):
             user.username = form.username.data
             user.email = form.email.data
-            user.image_url = form.image_url.data
-            user.header_image_url = form.header_image_url.data
+            user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
+            user.header_image_url = form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
             user.bio = form.bio.data
+            user.location = form.location.data
 
             db.session.commit()
             return redirect(f"/users/{user.id}")
@@ -272,7 +273,7 @@ def update_profile():
 
         # edit the user profile
 
-    return render_template("/users/edit.html", form=form )
+    return render_template("/users/edit.html", form=form, user_id=user.id)
 
     # TODO: IMPLEMENT THIS
 
@@ -292,7 +293,6 @@ def delete_user():
 
     do_logout()
 
-
     # DELETE FROM messages WHERE user_id = curr_user
     Message.query.filter_by(user_id=g.user.id).delete()
 
@@ -303,7 +303,6 @@ def delete_user():
     db.session.commit()
 
     return redirect(url_for("signup"))
-
 
 
 ##############################################################################
