@@ -46,8 +46,8 @@ class LoginForm(FlaskForm):
         validators=[InputRequired(), Length(min=6, max=50)]
     )
 
-#TODO: follow the pattern for form names UserUpdateForm() UserEditForm(). . . 
-class UpdateProfileForm(FlaskForm):
+#TODO: follow the pattern for form names UserUpdateForm() UserEditForm(). . .
+class UserUpdateForm(FlaskForm):
     """Update profile form."""
 
     username = StringField(

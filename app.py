@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm, UpdateProfileForm, CSRFProtectForm
+from forms import UserAddForm, LoginForm, MessageForm, UserUpdateForm, CSRFProtectForm
 from models import db, connect_db, User, Message, DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL
 
 load_dotenv()
@@ -257,7 +257,7 @@ def update_profile():
 
     user = g.user
 
-    form = UpdateProfileForm(obj=user)
+    form = UserUpdateForm(obj=user)
 
     if form.validate_on_submit():
         if User.authenticate(user.username, form.password.data):
