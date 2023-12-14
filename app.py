@@ -371,17 +371,27 @@ def homepage():
     """
     # TODO: make this cleaner. Alt way of doing this is to grab ids from following ...
     if g.user:
-        messages = (
-            Message
-                .query
-                    .filter(
-                        or_(
-                            Message.user_id.in_(
-                                user.id for user in g.user.following),
-                            Message.user_id == g.user.id))
+
+        following_ids = [follower.id for follower in g.user.following] + [g.user.id]
+
+        # messages = (
+        #     Message
+        #         .query
+        #         .filter(
+        #             or_(
+        #                 Message.user_id.in_(user.id for user in g.user.following),
+        #                 Message.user_id == g.user.id))
+        #         .order_by(Message.timestamp.desc())
+        #         .limit(100)
+        #         .all())
+
+        messages = (Message
+                    .query
+                    .filter(Message.user_id.in_(following_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
-                    .all())
+                    .all()
+                )
 
         return render_template('home.html', messages=messages)
 
