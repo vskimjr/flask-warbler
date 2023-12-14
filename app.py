@@ -367,6 +367,60 @@ def delete_message(message_id):
     return redirect(f"/users/{g.user.id}")
 
 
+@app.post('/messages/<int:message_id>/like')
+def like_message(message_id):
+    """ Like a message """
+
+    form = g.csrf_protection
+
+    if not form.validate_on_submit() or not g.user:
+        flash("Access unauthorized", "danger")
+        return redirect("/")
+
+    message = Message.query.get_or_404(message_id)
+
+    if message.user_id == g.user.id:
+        flash("Access unauthorized", "danger")
+        return redirect("/")
+
+        # TODO: where do we want to redirect here?
+
+    g.user.liked_messages.append(message)
+
+    db.session.commit()
+
+    return redirect(f"/messages/{message_id}")
+
+
+# A route for unlike /unlike/<int:message_id>
+
+@app.post('/messages/<int:message_id>/unlike')
+def unlike_message(message_id):
+    """ Unike a message """
+
+    form = g.csrf_protection
+
+    if not form.validate_on_submit() or not g.user:
+        flash("Access unauthorized", "danger")
+        return redirect("/")
+
+    message = Message.query.get_or_404(message_id)
+
+    if message.user_id == g.user.id:
+        flash("Access unauthorized", "danger")
+        return redirect("/")
+
+        # TODO: where do we want to redirect here?
+
+    if message in g.user.liked_messages:
+        g.user.liked_messages.remove(message)
+
+    db.session.commit()
+
+    return redirect(f"/messages/{message_id}")
+
+
+
 ##############################################################################
 # Homepage and error pages
 
@@ -405,3 +459,5 @@ def add_header(response):
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
     response.cache_control.no_store = True
     return response
+
+
