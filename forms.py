@@ -74,6 +74,11 @@ class UpdateProfileForm(FlaskForm):
         validators=[Optional(), Length(max=255)]
     )
 
+    location = StringField(
+        '(Optional) Location',
+        validators=([Optional(), Length(max=30)])
+    )
+
     password = PasswordField(
         'Password',
         validators=[InputRequired(), Length(min=6, max=50)],
