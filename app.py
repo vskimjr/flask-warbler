@@ -125,7 +125,7 @@ def logout():
     """Handle logout of user and redirect to homepage."""
 
     form = g.csrf_protection
-
+    # TODO: check to see if g.user exists
     if form.validate_on_submit():
         do_logout()
 
@@ -243,10 +243,12 @@ def stop_following(follow_id):
 @app.route('/users/profile', methods=["GET", "POST"])
 def update_profile():
     """Update profile for current user."""
+    # TODO: follow docstring pattern of other routes and include where it redirects
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect(url_for("homepage"))
+        # TODO: be consistent with the existing codebase
 
     user = g.user
 
@@ -344,7 +346,7 @@ def delete_message(message_id):
     """
 
     form = g.csrf_protection
-
+    #TODO: check to ALSO see if the user id of the message = user id of logged in user
     if not form.validate_on_submit() or not g.user:
         flash("Access unauthorized.", "danger")
         return redirect(url_for("homepage"))
@@ -367,10 +369,11 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of self & followed_users
     """
-
+    # TODO: make this cleaner. Alt way of doing this is to grab ids from following ...
     if g.user:
-        messages = (Message
-                    .query
+        messages = (
+            Message
+                .query
                     .filter(
                         or_(
                             Message.user_id.in_(
