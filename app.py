@@ -91,7 +91,7 @@ def signup():
 
         do_login(user)
 
-        return redirect("/")
+        return redirect(url_for("homepage"))
 
     else:
         return render_template('users/signup.html', form=form)
@@ -112,7 +112,7 @@ def login():
         if user:
             do_login(user)
             flash(f"Hello, {user.username}!", "success")
-            return redirect("/")
+            return redirect(url_for("homepage"))
 
         flash("Invalid credentials.", 'danger')
 
@@ -150,7 +150,7 @@ def list_users():
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect(url_for("login"))
 
     search = request.args.get('q')
 
@@ -168,7 +168,7 @@ def show_user(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect(url_for("login"))
 
     user = User.query.get_or_404(user_id)
 
@@ -209,7 +209,7 @@ def start_following(follow_id):
 
     if not g.user or not form.validate_on_submit():
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect(url_for("login"))
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.append(followed_user)
@@ -217,9 +217,7 @@ def start_following(follow_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}/following")
-    # TODO: Verify if this url_for is working
 
-    # f"/users/{g.user.id}/following")
 
 
 @app.post('/users/stop-following/<int:follow_id>')
@@ -235,7 +233,7 @@ def stop_following(follow_id):
         print("g.user=", g.user)
         # breakpoint()
         flash("Access unauthorized.", "danger")
-        return redirect(url_for("homepage"))
+        return redirect(url_for("login"))
 
     followed_user = User.query.get_or_404(follow_id)
     g.user.following.remove(followed_user)
@@ -249,9 +247,10 @@ def stop_following(follow_id):
 def update_profile():
     """Update profile for current user."""
 
-    # we are going to pass in the user to the form
-
-    # FIXME: Not validating user signed in
+    # Redirect user back to login page if not signed in
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect(url_for("login"))
 
     user = g.user
 
