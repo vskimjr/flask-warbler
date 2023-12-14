@@ -242,13 +242,18 @@ def stop_following(follow_id):
 
 @app.route('/users/profile', methods=["GET", "POST"])
 def update_profile():
-    """Update profile for current user."""
-    # TODO: follow docstring pattern of other routes and include where it redirects
+    """Update profile for current user.
+
+    Redirect to homepage if user not logged in and flash unauthorized.
+
+    Redirect to user profile page on success with flash msg.
+
+    Redirect to form page if user does not authenitcate when making change.
+    """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
-        # TODO: be consistent with the existing codebase
 
     user = g.user
 
