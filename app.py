@@ -346,12 +346,16 @@ def delete_message(message_id):
     """
 
     form = g.csrf_protection
-    #TODO: check to ALSO see if the user id of the message = user id of logged in user
     if not form.validate_on_submit() or not g.user:
         flash("Access unauthorized.", "danger")
         return redirect(url_for("homepage"))
 
     msg = Message.query.get_or_404(message_id)
+
+    if msg.user_id != g.user.id:
+        flash("Access unauthorized.", "danger")
+        return redirect(url_for("homepage"))
+
     db.session.delete(msg)
     db.session.commit()
 
@@ -372,18 +376,8 @@ def homepage():
     # TODO: make this cleaner. Alt way of doing this is to grab ids from following ...
     if g.user:
 
-        following_ids = [follower.id for follower in g.user.following] + [g.user.id]
-
-        # messages = (
-        #     Message
-        #         .query
-        #         .filter(
-        #             or_(
-        #                 Message.user_id.in_(user.id for user in g.user.following),
-        #                 Message.user_id == g.user.id))
-        #         .order_by(Message.timestamp.desc())
-        #         .limit(100)
-        #         .all())
+        following_ids = [
+            follower.id for follower in g.user.following] + [g.user.id]
 
         messages = (Message
                     .query
@@ -391,7 +385,7 @@ def homepage():
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all()
-                )
+                    )
 
         return render_template('home.html', messages=messages)
 
