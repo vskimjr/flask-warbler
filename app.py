@@ -1,7 +1,8 @@
 import os
 import pdb
-from dotenv import load_dotenv
+import requests
 
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
@@ -165,8 +166,8 @@ def list_users():
 def show_user(user_id):
     """Show user profile."""
 
-    g.user_liked_messages = [g_message.id for g_message in g.user.liked_messages]
-
+    g.user_liked_messages = [
+        g_message.id for g_message in g.user.liked_messages]
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -184,6 +185,13 @@ def show_following(user_id):
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
+
+    # TODO: Delete these comments after resolving redirect issues
+
+    # breakpoint()
+    # response = requests.get(f"http://localhost:5000/users/{user_id}/following")
+    # print("######### response.history", response.history)
+    # breakpoint()
 
     user = User.query.get_or_404(user_id)
     return render_template('users/following.html', user=user)
@@ -209,11 +217,13 @@ def start_following(follow_id):
     """
     form = g.csrf_protection
 
-    # TODO: Delete these comments after resolving redirect issue
+    # breakpoint()
+
+    # # TODO: Delete these comments after resolving redirect issues
 
     # form_data = request.form
 
-    # response = requests.get('http://localhost:5001/')
+    # response = requests.get(f"http://localhost:5000/users/follow/{follow_id}")
 
     # print("######### response.history[0]", response.history[0])
 
@@ -354,7 +364,8 @@ def show_message(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    g.user_liked_messages = [g_message.id for g_message in g.user.liked_messages]
+    g.user_liked_messages = [
+        g_message.id for g_message in g.user.liked_messages]
 
     msg = Message.query.get_or_404(message_id)
     return render_template('messages/show.html', message=msg)
@@ -384,6 +395,7 @@ def delete_message(message_id):
 
     return redirect(f"/users/{g.user.id}")
 
+
 @app.get("/users/<int:user_id>/liked-messages")
 def show_liked_messages(user_id):
 
@@ -398,7 +410,8 @@ def like_message(message_id):
 
     form = g.csrf_protection
 
-    g.user_liked_messages = [g_message.id for g_message in g.user.liked_messages]
+    g.user_liked_messages = [
+        g_message.id for g_message in g.user.liked_messages]
 
     # breakpoint()
 
@@ -420,7 +433,6 @@ def like_message(message_id):
     g.user.liked_messages.append(message)
 
     print("########## g.user.liked_messages", g.user.liked_messages)
-
 
     db.session.commit()
 
@@ -457,7 +469,6 @@ def unlike_message(message_id):
     return redirect(f"/messages/{message_id}")
 
 
-
 ##############################################################################
 # Homepage and error pages
 
@@ -472,7 +483,8 @@ def homepage():
 
     if g.user:
 
-        g.user_liked_messages = [g_message.id for g_message in g.user.liked_messages]
+        g.user_liked_messages = [
+            g_message.id for g_message in g.user.liked_messages]
 
         following_ids = [
             follower.id for follower in g.user.following] + [g.user.id]
@@ -498,5 +510,3 @@ def add_header(response):
     # https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
     response.cache_control.no_store = True
     return response
-
-
