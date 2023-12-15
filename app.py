@@ -373,19 +373,27 @@ def like_message(message_id):
 
     form = g.csrf_protection
 
+    # breakpoint()
+
     if not form.validate_on_submit() or not g.user:
         flash("Access unauthorized", "danger")
         return redirect("/")
 
     message = Message.query.get_or_404(message_id)
 
+    # breakpoint()
+
     if message.user_id == g.user.id:
+        # breakpoint()
         flash("Access unauthorized", "danger")
         return redirect("/")
 
         # TODO: where do we want to redirect here?
 
     g.user.liked_messages.append(message)
+
+    print("########## g.user.liked_messages", g.user.liked_messages)
+
 
     db.session.commit()
 

@@ -49,17 +49,19 @@
           <span class="text-muted">
               {{ message.timestamp.strftime('%d %B %Y') }}
             </span>
-          {% if message.id not in g.user.liked_messages %}
-          <form method="POST" action="/messages/{{ message.id }}/like">
+          {% if message.id in {% for [g_message.id for g_message in g.user.liked_messages] %} {% endfor %} %}
+          <form method="POST"
+                action="/messages/{{ message.id }}/unlike">
+            {{ g.csrf_protection.hidden_tag() }}
+            <i class="bi bi-heart-fill"></i>
+            <button class="btn btn-link text-muted">Unlike</button>
+          </form>
+          {% else %}
+          <form method="POST"
+                action="/messages/{{ message.id }}/like">
             {{ g.csrf_protection.hidden_tag() }}
             <i class="bi bi-heart"></i>
             <button class="btn btn-link text-muted">Like</button>
-          </form>
-          {% else %}
-          <form method="POST" action="/messages/{{ message.id }}/unlike">
-            {{ g.csrf_protection.hidden_tag() }}
-            <i class="bi bi-heart-fill text-danger"></i>
-            <button class="btn btn-link text-muted">Unlike</button>
           </form>
           {% endif %}
         </div>
