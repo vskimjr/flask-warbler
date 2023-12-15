@@ -420,11 +420,13 @@ def like_message(message_id):
 
     # TODO: We would like to redirect to page where post request was made
 
+    # TODO: Click on the heart to like/unlike
+
     # FIXME: Temporary workaround for functionality as g.user.liked_messages
     # would be preferred. Works in flask, not in HTML
 
-    g.user_liked_messages = [
-        g_message.id for g_message in g.user.liked_messages]
+    # g.user_liked_messages = [
+    #     g_message.id for g_message in g.user.liked_messages]
 
 
     if not form.validate_on_submit() or not g.user:

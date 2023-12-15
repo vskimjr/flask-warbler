@@ -20,6 +20,19 @@
               {{ message.timestamp.strftime('%d %B %Y') }}
             </span>
         <p>{{ message.text }}</p>
+        {% if message in g.user.liked_messages %}
+        <form class="messages-like-bottom" method="POST" action="/messages/{{ message.id }}/unlike">
+          {{ g.csrf_protection.hidden_tag() }}
+          <button class="btn btn-link text-muted"><i class="bi bi-heart-fill text-danger"></i> Unlike</button>
+        </form>
+        {% else %}
+        <form class="messages-like-bottom" method="POST" action="/messages/{{ message.id }}/like">
+          {{ g.csrf_protection.hidden_tag() }}
+
+          <button class="btn btn-link text-muted"><i class="bi bi-heart"></i> Like</button>
+        </form>
+        {% endif %}
+
       </div>
     </li>
 

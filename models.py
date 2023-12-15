@@ -192,11 +192,16 @@ class Like(db.Model):
 
     __tablename__ = "likes"
 
+    # Relationship tables will not need a primary key
+
     id = db.Column(
         db.Integer,
         primary_key=True,
         autoincrement=True
     )
+
+    # If we didn't use a PK, we set message_id & user_id set as primary key
+    # FIXME: set message_id & user_id to primary key and remove 197
 
     message_id = db.Column(
         db.Integer,

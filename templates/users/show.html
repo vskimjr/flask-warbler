@@ -20,17 +20,17 @@
         <p>{{ message.text }}</p>
       </div>
       <div class="interaction-menu z-2">
-        {% if message.id in g.user_liked_messages %}
+        {% if message in g.user.liked_messages %}
         <form class="" method="POST" action="/messages/{{ message.id }}/unlike">
           {{ g.csrf_protection.hidden_tag() }}
-          <i class="bi bi-heart-fill text-danger"></i>
-          <button class="btn btn-link text-muted">Unlike</button>
+
+          <button class="btn btn-link text-muted"><i class="bi bi-heart-fill text-danger"></i> Unlike</button>
         </form>
         {% else %}
         <form method="POST" action="/messages/{{ message.id }}/like">
           {{ g.csrf_protection.hidden_tag() }}
-          <i class="bi bi-heart"></i>
-          <button class="btn btn-link text-muted">Like</button>
+
+          <button class="btn btn-link text-muted"><i class="bi bi-heart"></i> Like</button>
         </form>
         {% endif %}
       </div>
