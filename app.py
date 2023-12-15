@@ -338,6 +338,8 @@ def show_message(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
+    g.user_liked_messages = [g_message.id for g_message in g.user.liked_messages]
+
     msg = Message.query.get_or_404(message_id)
     return render_template('messages/show.html', message=msg)
 
@@ -372,6 +374,8 @@ def like_message(message_id):
     """ Like a message """
 
     form = g.csrf_protection
+
+    g.user_liked_messages = [g_message.id for g_message in g.user.liked_messages]
 
     # breakpoint()
 
@@ -408,6 +412,8 @@ def unlike_message(message_id):
 
     form = g.csrf_protection
 
+    g.liked_messages = [g_message.id for g_message in g.user.liked_messages]
+
     if not form.validate_on_submit() or not g.user:
         flash("Access unauthorized", "danger")
         return redirect("/")
@@ -420,7 +426,7 @@ def unlike_message(message_id):
 
         # TODO: where do we want to redirect here?
 
-    if message in g.user.liked_messages:
+    if message.id in g.liked_messages:
         g.user.liked_messages.remove(message)
 
     db.session.commit()
