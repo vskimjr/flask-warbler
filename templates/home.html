@@ -54,16 +54,14 @@
           <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
           <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
           <p>{{ msg.text }}</p>
-        </div>
-        <div class="interaction-menu z-2">
           {% if msg.id in g.user_liked_messages %}
-          <form class="" method="POST" action="/messages/{{ msg.id }}/unlike">
+          <form class="messages-like-bottom" method="POST" action="/messages/{{ msg.id }}/unlike">
             {{ g.csrf_protection.hidden_tag() }}
             <i class="bi bi-heart-fill text-danger"></i>
             <button class="btn btn-link text-muted">Unlike</button>
           </form>
           {% else %}
-          <form method="POST" action="/messages/{{ msg.id }}/like">
+          <form class="messages-like-bottom" method="POST" action="/messages/{{ msg.id }}/like">
             {{ g.csrf_protection.hidden_tag() }}
             <i class="bi bi-heart"></i>
             <button class="btn btn-link text-muted">Like</button>
