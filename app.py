@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
+
 from forms import UserAddForm, LoginForm, MessageForm, UserUpdateForm, CSRFProtectForm
 from models import db, connect_db, User, Message, DEFAULT_IMAGE_URL, DEFAULT_HEADER_IMAGE_URL
 
@@ -164,6 +165,9 @@ def list_users():
 def show_user(user_id):
     """Show user profile."""
 
+    g.user_liked_messages = [g_message.id for g_message in g.user.liked_messages]
+
+
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -204,6 +208,18 @@ def start_following(follow_id):
     Redirect to following page for the current for the current user.
     """
     form = g.csrf_protection
+
+    # TODO: Delete these comments after resolving redirect issue
+
+    # form_data = request.form
+
+    # response = requests.get('http://localhost:5001/')
+
+    # print("######### response.history[0]", response.history[0])
+
+    # print("######### form_data", form_data)
+
+    # breakpoint()
 
     if not g.user or not form.validate_on_submit():
         flash("Access unauthorized.", "danger")
