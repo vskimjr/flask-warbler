@@ -449,6 +449,8 @@ def homepage():
 
     if g.user:
 
+        g.user_liked_messages = [g_message.id for g_message in g.user.liked_messages]
+
         following_ids = [
             follower.id for follower in g.user.following] + [g.user.id]
 
