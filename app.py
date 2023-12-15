@@ -1,6 +1,6 @@
 import os
 import pdb
-import requests
+# import requests
 
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, flash, redirect, session, g
@@ -166,6 +166,9 @@ def list_users():
 def show_user(user_id):
     """Show user profile."""
 
+    # FIXME: Temporary workaround for functionality as g.user.liked_messages
+    # would be preferred. Works in flask, not in HTML
+
     g.user_liked_messages = [
         g_message.id for g_message in g.user.liked_messages]
 
@@ -219,7 +222,7 @@ def start_following(follow_id):
 
     # breakpoint()
 
-    # # TODO: Delete these comments after resolving redirect issues
+    # FIXME: as about requests.get / redirecting back to original page
 
     # form_data = request.form
 
@@ -364,6 +367,9 @@ def show_message(message_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
+    # FIXME: Temporary workaround for functionality as g.user.liked_messages
+    # would be preferred. Works in flask, not in HTML
+
     g.user_liked_messages = [
         g_message.id for g_message in g.user.liked_messages]
 
@@ -406,14 +412,20 @@ def show_liked_messages(user_id):
 
 @app.post('/messages/<int:message_id>/like')
 def like_message(message_id):
-    """ Like a message """
+    """Like a message
+    On success, redirects to message page
+    """
 
     form = g.csrf_protection
+
+    # TODO: We would like to redirect to page where post request was made
+
+    # FIXME: Temporary workaround for functionality as g.user.liked_messages
+    # would be preferred. Works in flask, not in HTML
 
     g.user_liked_messages = [
         g_message.id for g_message in g.user.liked_messages]
 
-    # breakpoint()
 
     if not form.validate_on_submit() or not g.user:
         flash("Access unauthorized", "danger")
@@ -421,14 +433,9 @@ def like_message(message_id):
 
     message = Message.query.get_or_404(message_id)
 
-    # breakpoint()
-
     if message.user_id == g.user.id:
-        # breakpoint()
         flash("Access unauthorized", "danger")
         return redirect(f"/messages/{message_id}")
-
-        # TODO: where do we want to redirect here?
 
     g.user.liked_messages.append(message)
 
@@ -443,7 +450,11 @@ def like_message(message_id):
 
 @app.post('/messages/<int:message_id>/unlike')
 def unlike_message(message_id):
-    """ Unike a message """
+    """Unike a message
+    On success, redirects to message page
+    """
+
+    # TODO: We would like to redirect to page where post request was made
 
     form = g.csrf_protection
 
@@ -458,8 +469,6 @@ def unlike_message(message_id):
     if message.user_id == g.user.id:
         flash("Access unauthorized", "danger")
         return redirect("/")
-
-        # TODO: where do we want to redirect here?
 
     if message.id in g.liked_messages:
         g.user.liked_messages.remove(message)
@@ -480,6 +489,9 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of self & followed_users
     """
+
+    # FIXME: Temporary workaround for functionality as g.user.liked_messages
+    # would be preferred. Works in flask, not in HTML
 
     if g.user:
 
